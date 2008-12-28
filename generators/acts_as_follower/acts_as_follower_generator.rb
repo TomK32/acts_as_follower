@@ -1,4 +1,4 @@
-class ActsAsFollowerMigrationGenerator < Rails::Generator::Base
+class ActsAsFollowerGenerator < Rails::Generator::Base
   def manifest
     record do |m| 
       m.directory "app/models"
