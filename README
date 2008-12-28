@@ -13,8 +13,8 @@ Install
 * Run the following command:
 	./script/plugin install git://github.com/tcocca/acts_as_follower.git 
 	
-* Create a new rails migration using the generator:
-	./script/generate acts_as_follower_migration
+* Create a new rails migration and create the corresponding Follow model (app/models/follow.rb) using the generator:
+	./script/generate acts_as_follower
 
 
 Usage & Examples
