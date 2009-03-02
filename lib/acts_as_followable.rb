@@ -29,13 +29,32 @@ module ActiveRecord #:nodoc:
         
         # Returns the following records.
         def followers
-          Follow.find(:all, :include => [:follower], :conditions => ["followable_id = ? AND followable_type = ?", 
+          Follow.unblocked.find(:all, :include => [:follower], :conditions => ["followable_id = ? AND followable_type = ?", 
               self.id, parent_class_name(self)]).collect {|f| f.follower }
+        end
+        
+        def follower_ids_by_type(follower_type)
+          Follow.unblocked.for_followable(self).by_follower_type(follower_type).find(:all, :select => :follower_id, :conditions => {:blocked => false}).collect(&:follower_id)
         end
         
         # Returns true if the current instance is followed by the passed record.
         def followed_by?(follower)
-          Follow.find(:first, :conditions => ["followable_id = ? AND followable_type = ? AND follower_id = ? AND follower_type = ?", self.id, parent_class_name(self), follower.id, parent_class_name(follower)]) ? true : false
+          Follow.unblocked.find(:first, :conditions => ["followable_id = ? AND followable_type = ? AND follower_id = ? AND follower_type = ?", self.id, parent_class_name(self), follower.id, parent_class_name(follower)]) ? true : false
+        end
+        
+        def block_follower(follower, block_follower = true)
+          return unless follower.follows.for_followable(self).first
+          follow = self.follows.for_followable(follower).first
+          follower.follows.for_followable(self).first.delete if follower.follows.for_followable(self).first
+          if follow
+            follow.update_attribute(:blocked, block_follower)
+          else
+            self.follows.create(:followable => follower, :blocked => true)
+          end
+        end
+
+        def unblock_follower(follower)
+          self.follows.for_followable(follower).first.delete
         end
         
         # Retrieves the parent class name if using STI.

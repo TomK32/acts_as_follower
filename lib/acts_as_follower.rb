@@ -23,15 +23,16 @@ module ActiveRecord #:nodoc:
         
         # Returns true if this instance is following the object passed as an argument.
         def following?(followable)
-          0 < Follow.count(:all, :conditions => [
-                "follower_id = ? AND follower_type = ? AND followable_id = ? AND followable_type = ?",
-                 self.id, parent_class_name(self), followable.id, parent_class_name(followable)
-               ])
+          Follow.unblocked.exists?(follower_and_followable_conditions(self, followable))
+        end
+        
+        def blocks?(followable)
+          self.follows.for_followable(followable).exists?(:blocked => true)
         end
         
         # Returns the number of objects this instance is following.
         def follow_count
-          Follow.count(:all, :conditions => ["follower_id = ? AND follower_type = ?", self.id, parent_class_name(self)])
+          Follow.unblocked.count(:all, :conditions => ["follower_id = ? AND follower_type = ?", self.id, parent_class_name(self)])
         end
         
         # Creates a new follow record for this instance to follow the passed object.
@@ -54,13 +55,16 @@ module ActiveRecord #:nodoc:
         # TODO: Remove from public API.
         # Returns the follow records related to this instance by type.
         def follows_by_type(followable_type)
-          Follow.find(:all, :conditions => ["follower_id = ? AND follower_type = ? AND followable_type = ?", self.id, parent_class_name(self), followable_type])
+          followable_type.constantize.find(follow_ids_by_type(followable_type))
         end
         
+        def follow_ids_by_type(followable_type)
+          Follow.unblocked.for_follower(self).by_followable_type(followable_type).find(:all, :select => :followable_id, :conditions => {:blocked => false}).collect(&:followable_id)
+        end
         # TODO: Remove from public API.
         # Returns the follow records related to this instance by type.
         def all_follows
-          Follow.find(:all, :include => [:followable], :conditions => ["follower_id = ? AND follower_type = ?", self.id, parent_class_name(self)])
+          Follow.unblocked.find(:all, :include => [:followable], :conditions => ["follower_id = ? AND follower_type = ?", self.id, parent_class_name(self)])
         end
         
         # Returns the actual records which this instance is following.
