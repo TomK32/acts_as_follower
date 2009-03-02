@@ -37,6 +37,10 @@ module ActiveRecord #:nodoc:
           Follow.unblocked.for_followable(self).by_follower_type(follower_type).find(:all, :select => :follower_id, :conditions => {:blocked => false}).collect(&:follower_id)
         end
         
+        def follower_count_by_type(follower_type)
+          Follow.unblocked.for_followable(self).by_follower_type(follower_type).count
+        end
+        
         # Returns true if the current instance is followed by the passed record.
         def followed_by?(follower)
           Follow.unblocked.find(:first, :conditions => ["followable_id = ? AND followable_type = ? AND follower_id = ? AND follower_type = ?", self.id, parent_class_name(self), follower.id, parent_class_name(follower)]) ? true : false

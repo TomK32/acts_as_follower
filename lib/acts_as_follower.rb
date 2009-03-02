@@ -58,9 +58,14 @@ module ActiveRecord #:nodoc:
           followable_type.constantize.find(follow_ids_by_type(followable_type))
         end
         
-        def follow_ids_by_type(followable_type)
+        def followable_ids_by_type(followable_type)
           Follow.unblocked.for_follower(self).by_followable_type(followable_type).find(:all, :select => :followable_id, :conditions => {:blocked => false}).collect(&:followable_id)
         end
+
+        def followable_count_by_type(followable_type)
+          Follow.unblocked.for_follower(self).by_followable_type(followable_type).count
+        end
+
         # TODO: Remove from public API.
         # Returns the follow records related to this instance by type.
         def all_follows
