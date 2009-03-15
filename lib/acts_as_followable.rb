@@ -33,8 +33,8 @@ module ActiveRecord #:nodoc:
               self.id, parent_class_name(self)]).collect {|f| f.follower }
         end
         
-        def follower_ids_by_type(follower_type)
-          Follow.unblocked.for_followable(self).by_follower_type(follower_type).find(:all, :select => :follower_id, :conditions => {:blocked => false}).collect(&:follower_id)
+        def follower_ids_by_type(follower_type, *args)
+          Follow.unblocked.for_followable(self).by_follower_type(follower_type).find(:all, :select => :follower_id, :conditions => {:blocked => false}, *args).collect(&:follower_id)
         end
         
         def follower_count_by_type(follower_type)

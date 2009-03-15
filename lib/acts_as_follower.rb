@@ -58,8 +58,8 @@ module ActiveRecord #:nodoc:
           followable_type.constantize.find(follow_ids_by_type(followable_type))
         end
         
-        def followable_ids_by_type(followable_type)
-          Follow.unblocked.for_follower(self).by_followable_type(followable_type).find(:all, :select => :followable_id, :conditions => {:blocked => false}).collect(&:followable_id)
+        def followable_ids_by_type(followable_type, *args)
+          Follow.unblocked.for_follower(self).by_followable_type(followable_type).find(:all, :select => :followable_id, :conditions => {:blocked => false}, *args).collect(&:followable_id)
         end
 
         def followable_count_by_type(followable_type)
