@@ -55,7 +55,7 @@ module ActiveRecord #:nodoc:
         # TODO: Remove from public API.
         # Returns the follow records related to this instance by type.
         def follows_by_type(followable_type)
-          followable_type.constantize.find(follow_ids_by_type(followable_type))
+          followable_type.constantize.find(followable_ids_by_type(followable_type))
         end
         
         def followable_ids_by_type(followable_type, *args)
